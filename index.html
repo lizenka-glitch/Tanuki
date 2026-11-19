@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TanukiFamily | Гастропаспорт</title>
     <style>
-        /* === БАЗОВЫЕ СТИЛИ === */
         :root {
             --tanuki-red: #e31e24;
             --tanuki-dark: #1a1a1a;
@@ -15,218 +14,246 @@
             --text-muted: #888888;
             --border-color: #e0e0e0;
             --success: #4caf50;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --nav-height: 60px;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            font-family: var(--font-family);
-            background-color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Имитация мобильного экрана */
-        #app {
-            width: 100%;
-            max-width: 430px;
-            height: 100%;
-            background-color: var(--card-bg);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            overflow-y: auto;
-            overflow-x: hidden;
-        }
-
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #e0e0e0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        #app { width: 100%; max-width: 430px; height: 100%; background-color: var(--card-bg); position: relative; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        #main-content { flex: 1; overflow-y: auto; position: relative; padding-bottom: 10px; }
+        
         .screen { display: none; padding: 20px; min-height: 100%; flex-direction: column; }
         .screen.active { display: flex; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .btn { background: var(--tanuki-red); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; transition: opacity 0.2s; }
-        .btn:active { opacity: 0.8; }
+        .btn { background: var(--tanuki-red); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; text-align: center; margin-bottom: 10px; transition: transform 0.1s; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn:disabled { background: var(--border-color); color: var(--text-muted); cursor: not-allowed; }
         .btn-secondary { background: var(--bg-color); color: var(--tanuki-dark); border: 1px solid var(--border-color); }
 
         h1 { font-size: 24px; margin-bottom: 10px; }
+        h2 { font-size: 20px; margin-bottom: 15px; }
         p { font-size: 14px; line-height: 1.5; color: var(--text-muted); margin-bottom: 10px; }
-
+        
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-top: 10px; }
         .header-title { font-weight: bold; font-size: 18px; }
         .back-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-main); }
 
-        /* Экран Приветствия */
+        #bottom-nav { display: flex; justify-content: space-around; align-items: center; height: var(--nav-height); background: white; border-top: 1px solid var(--border-color); padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-muted); cursor: pointer; width: 20%; }
+        .nav-item.active { color: var(--tanuki-red); font-weight: bold; }
+        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+
         #screen-welcome { justify-content: center; align-items: center; text-align: center; background: linear-gradient(135deg, #fff 0%, #ffe5e5 100%); }
         .welcome-icon { font-size: 60px; margin-bottom: 20px; }
         
-        /* Главный экран */
         .progress-container { margin-bottom: 20px; }
         .progress-bar { height: 8px; background: var(--bg-color); border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-fill { height: 100%; background: var(--tanuki-red); width: 0%; transition: width 0.5s ease; }
         
         .steps-list { display: flex; flex-direction: column; gap: 12px; }
-        .step-card { display: flex; align-items: center; padding: 15px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--card-bg); }
+        .step-card { display: flex; align-items: center; padding: 15px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--card-bg); transition: all 0.3s; }
         .step-card.locked { opacity: 0.6; }
         .step-card.active-step { border-color: var(--tanuki-red); box-shadow: 0 4px 12px rgba(227, 30, 36, 0.1); }
-        .step-card.completed { background: #f0fdf4; border-color: var(--success); }
+        .step-card.completed { background: #f0fdf4; border-color: var(--success); animation: markPulse 0.5s ease; }
+        @keyframes markPulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         
         .step-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-color); display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 20px; }
         .step-info { flex: 1; }
         .step-name { font-weight: 600; font-size: 16px; }
         .step-status { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
         
-        /* Меню */
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .product-card { background: var(--bg-color); border-radius: 12px; overflow: hidden; padding: 10px; display: flex; flex-direction: column; }
-        .product-img { width: 100%; height: 120px; background: #ddd; border-radius: 8px; object-fit: cover; margin-bottom: 10px; }
+        .product-card { background: var(--bg-color); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; }
+        .product-img { width: 100%; height: 120px; border-radius: 8px; object-fit: cover; margin-bottom: 10px; }
         .product-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
         .product-price { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
-        .add-btn { background: white; border: 1px solid var(--tanuki-red); color: var(--tanuki-red); border-radius: 8px; padding: 8px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; }
+        .add-btn { background: white; border: 1px solid var(--tanuki-red); color: var(--tanuki-red); border-radius: 8px; padding: 8px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; transition: all 0.2s; }
+        .add-btn:active { background: var(--tanuki-red); color: white; }
 
-        /* Корзина и Форма */
-        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        .cart-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         .cart-total { display: flex; justify-content: space-between; font-weight: bold; font-size: 18px; margin: 20px 0; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 5px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 16px; }
+        .form-group label span { font-weight: normal; font-size: 11px; }
+        .form-group input { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; }
         
-        /* Заказы */
         .order-card { background: var(--bg-color); padding: 15px; border-radius: 12px; margin-bottom: 10px; }
         .order-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-top: 10px; }
         .status-delivered { background: #dcfce7; color: #166534; }
         .status-pending { background: #fef9c3; color: #854d0e; }
 
-        /* Админка */
-        #admin-panel { background: #1e1e1e; color: white; padding: 20px; display: none; z-index: 100; position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; }
-        #admin-panel.active { display: block; }
-        .admin-section { background: #2d2d2d; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .admin-btn { background: #4a4a4a; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 5px; width: 100%; text-align: left;}
-        .admin-btn:hover { background: #666; }
+        .event-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .event-card h3 { margin-bottom: 5px; font-size: 16px; }
+        .event-meta { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+        .event-secret { background: #fef9c3; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; font-weight: bold; color: #854d0e; }
+        .event-address { background: #dcfce7; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; font-weight: bold; color: #166534; }
+        .event-countdown { background: #e0f2fe; padding: 10px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; font-weight: bold; color: #0369a1; }
+
+        .notification-item { background: var(--bg-color); padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+        .notification-item.unread { border-left: 3px solid var(--tanuki-red); background: #fff; }
+
+        #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--tanuki-dark); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; }
+        #toast.show { opacity: 1; }
+
+        /* Стили для экрана голосования (Ужин в процессе) */
+        .vote-badge { background: var(--tanuki-red); color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+        .vote-card { display: flex; background: var(--bg-color); border-radius: 12px; padding: 12px; margin-bottom: 15px; gap: 12px; align-items: center; }
+        .vote-img-wrapper { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+        .vote-img-wrapper img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; }
+        .vote-img-badge { position: absolute; top: 4px; left: 4px; background: rgba(255,255,255,0.9); color: #333; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; }
+        .vote-info { flex: 1; }
+        .vote-title { font-weight: bold; font-size: 14px; margin-bottom: 4px; color: var(--tanuki-dark); }
+        .vote-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.3; }
+        .vote-progress-container { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .vote-progress-bar { flex: 1; height: 6px; background: #fff; border-radius: 3px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
+        .vote-progress-fill { height: 100%; background: var(--tanuki-red); width: 0%; transition: width 0.4s ease; }
+        .vote-percent { font-size: 11px; font-weight: bold; color: var(--text-main); }
+        .vote-actions { display: flex; justify-content: space-between; align-items: center; }
+        .vote-btn { background: var(--tanuki-red); color: white; border: none; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+        .vote-btn:active { opacity: 0.8; }
+        .vote-btn.voted { background: #fff; color: var(--tanuki-red); border: 1px solid var(--tanuki-red); cursor: default; }
+        .vote-btn.disabled { background: var(--border-color); color: var(--text-muted); border: none; cursor: not-allowed; }
+        .vote-avatars { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+        .vote-avatars span { font-size: 14px; letter-spacing: -4px; margin-right: 4px; }
     </style>
 </head>
 <body>
 
 <div id="app">
-    <!-- Экран 1: Приветствие -->
-    <div id="screen-welcome" class="screen active">
-        <div class="welcome-icon">🍣</div>
-        <h1>Собери Гастропаспорт</h1>
-        <p>Попадёшь на секретный ужин!</p>
-        <p style="margin-bottom: 30px;">Заказывай в 5 заведениях, собирай отметки и получай доступ к закрытому мероприятию.</p>
-        <button class="btn" onclick="App.startApp()">Начать</button>
-    </div>
-
-    <!-- Экран 2: Гастропаспорт -->
-    <div id="screen-passport" class="screen">
-        <div class="header">
-            <div class="header-title">Гастропаспорт</div>
-            <div style="font-size: 12px; color: var(--tanuki-red); cursor: pointer; font-weight:bold;" onclick="App.goTo('profile')">Мои заказы</div>
+    <div id="main-content">
+        <div id="screen-welcome" class="screen active">
+            <div class="welcome-icon">🍣</div>
+            <h1>Собери Гастропаспорт</h1>
+            <p>Попадёшь на секретный ужин!</p>
+            <p style="margin-bottom: 30px;">Заказывай в 5 заведениях, собирай отметки и получай доступ к закрытому мероприятию.</p>
+            <button class="btn" onclick="App.startApp()">Начать</button>
         </div>
-        
-        <div class="progress-container">
-            <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;">
-                <span>Прогресс</span>
-                <span id="passport-progress-text">0 из 5</span>
+
+        <div id="screen-passport" class="screen">
+            <div class="header">
+                <div class="header-title">Гастропаспорт</div>
+                <div style="font-size: 12px; color: var(--tanuki-red); cursor: pointer; font-weight:bold;" onclick="App.goTo('notifications')">🔔 Уведомления</div>
             </div>
-            <div class="progress-bar"><div id="passport-progress-fill" class="progress-fill"></div></div>
+            <div class="progress-container">
+                <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;">
+                    <span>Цикл <span id="cycle-num">1</span></span>
+                    <span id="passport-progress-text">0 из 5</span>
+                </div>
+                <div class="progress-bar"><div id="passport-progress-fill" class="progress-fill"></div></div>
+            </div>
+            <div id="steps-container" class="steps-list"></div>
+            <div id="event-block" style="margin-top: 20px; display: none;">
+                <button class="btn" onclick="App.goTo('events')">🎉 Перейти к мероприятиям</button>
+            </div>
+            <button class="btn btn-secondary" style="margin-top:20px;" onclick="App.goTo('passport')">Обновить паспорт</button>
         </div>
 
-        <div id="steps-container" class="steps-list"></div>
-        
-        <div id="event-block" style="margin-top: 20px; display: none;">
-            <button class="btn" onclick="App.goTo('events')">Перейти к мероприятиям</button>
+        <div id="screen-partner" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('passport')">←</button>
+                <div class="header-title" id="partner-title">Загрузка...</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <p id="partner-desc"></p>
+            <div class="menu-grid" id="partner-menu"></div>
+            <button class="btn btn-secondary" style="margin-top:20px;" onclick="App.goTo('passport')">Вернуться в основное меню</button>
+        </div>
+
+        <div id="screen-cart" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('partner')">←</button>
+                <div class="header-title">Корзина</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div id="cart-items"></div>
+            <div class="cart-total"><span>Итого:</span><span id="cart-total-price">0 ₽</span></div>
+            <button class="btn" onclick="App.goTo('checkout')">Оформить заказ</button>
+            <button class="btn btn-secondary" onclick="App.goTo('passport')">Вернуться в основное меню</button>
+        </div>
+
+        <div id="screen-checkout" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('cart')">←</button>
+                <div class="header-title">Оформление</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div class="form-group"><label>Имя</label><input type="text" id="order-name" placeholder="Иван" required></div>
+            <div class="form-group"><label>Телефон</label><input type="tel" id="order-phone" placeholder="+7 (999) 000-00-00" required></div>
+            <div class="form-group"><label>Адрес</label><input type="text" id="order-address" placeholder="ул. Пушкина, д. 1" required></div>
+            <div class="form-group"><label>Комментарий <span>(необязательно)</span></label><input type="text" id="order-comment" placeholder="Например, позвонить за час"></div>
+            <button class="btn" onclick="App.submitOrder()">Подтвердить заказ</button>
+            <button class="btn btn-secondary" onclick="App.goTo('passport')">Вернуться в основное меню</button>
+        </div>
+
+        <div id="screen-profile" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('passport')">←</button>
+                <div class="header-title">Мои заказы</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div id="orders-list"></div>
+            <!-- Кнопка админки удалена отсюда -->
+            <button class="btn btn-secondary" style="margin-top: 20px;" onclick="App.goTo('passport')">Вернуться в основное меню</button>
+        </div>
+
+        <div id="screen-events" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('passport')">←</button>
+                <div class="header-title">Секретные ужины</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div id="events-list"></div>
+        </div>
+
+        <div id="screen-notifications" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('passport')">←</button>
+                <div class="header-title">Уведомления</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div id="notifications-list"></div>
+        </div>
+
+        <!-- НОВЫЙ ЭКРАН: Ужин в процессе -->
+        <div id="screen-dinner-voting" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('events')">←</button>
+                <div class="header-title">ГастроПаспорт</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <h1 style="font-size: 22px; margin-bottom: 5px;">Ужин в процессе</h1>
+            <p style="font-size: 13px; margin-bottom: 15px;">Ваше мнение важно! Помогите нам выбрать самые любимые блюда.</p>
+            
+            <div id="voting-container"></div>
+            
+            <button id="finish-dinner-btn" class="btn" style="margin-top: auto; display: none;" onclick="App.finishDinner()">Завершить ужин</button>
+        </div>
+
+        <div id="screen-event-finished" class="screen">
+            <div class="header">
+                <button class="back-btn" onclick="App.goTo('passport')">←</button>
+                <div class="header-title">Завершение</div>
+                <div style="width: 24px;"></div>
+            </div>
+            <div id="finished-content"></div>
         </div>
     </div>
 
-    <!-- Экран 3: Партнер -->
-    <div id="screen-partner" class="screen">
-        <div class="header">
-            <button class="back-btn" onclick="App.goTo('passport')">←</button>
-            <div class="header-title" id="partner-title">Загрузка...</div>
-            <div style="width: 24px;"></div>
-        </div>
-        <p id="partner-desc"></p>
-        <div class="menu-grid" id="partner-menu"></div>
+    <div id="bottom-nav">
+        <div class="nav-item" onclick="App.goTo('passport')" id="nav-home"><div class="nav-icon">🏠</div><div>Главная</div></div>
+        <div class="nav-item" onclick="App.goTo('passport')" id="nav-passport"><div class="nav-icon">📔</div><div>Паспорт</div></div>
+        <div class="nav-item" onclick="App.goTo('profile')" id="nav-orders"><div class="nav-icon">📦</div><div>Заказы</div></div>
+        <div class="nav-item" onclick="App.goTo('events')" id="nav-events"><div class="nav-icon">🎉</div><div>Мероприятия</div></div>
+        <div class="nav-item" onclick="App.goTo('profile')" id="nav-profile"><div class="nav-icon">👤</div><div>Профиль</div></div>
     </div>
 
-    <!-- Экран 4: Корзина -->
-    <div id="screen-cart" class="screen">
-        <div class="header">
-            <button class="back-btn" onclick="App.goTo('partner')">←</button>
-            <div class="header-title">Корзина</div>
-            <div style="width: 24px;"></div>
-        </div>
-        <div id="cart-items"></div>
-        <div class="cart-total">
-            <span>Итого:</span>
-            <span id="cart-total-price">0 ₽</span>
-        </div>
-        <button class="btn" onclick="App.goTo('checkout')">Оформить заказ</button>
-    </div>
-
-    <!-- Экран 5: Оформление -->
-    <div id="screen-checkout" class="screen">
-        <div class="header">
-            <button class="back-btn" onclick="App.goTo('cart')">←</button>
-            <div class="header-title">Оформление</div>
-            <div style="width: 24px;"></div>
-        </div>
-        <div class="form-group">
-            <label>Имя</label>
-            <input type="text" id="order-name" placeholder="Иван" required>
-        </div>
-        <div class="form-group">
-            <label>Телефон</label>
-            <input type="tel" id="order-phone" placeholder="+7 (999) 000-00-00" required>
-        </div>
-        <div class="form-group">
-            <label>Адрес доставки</label>
-            <input type="text" id="order-address" placeholder="ул. Пушкина, д. 1" required>
-        </div>
-        <button class="btn" onclick="App.submitOrder()">Подтвердить заказ</button>
-    </div>
-
-    <!-- Экран 6: Профиль -->
-    <div id="screen-profile" class="screen">
-        <div class="header">
-            <button class="back-btn" onclick="App.goTo('passport')">←</button>
-            <div class="header-title">Мои заказы</div>
-            <div style="width: 24px;"></div>
-        </div>
-        <div id="orders-list"></div>
-        <button class="btn btn-secondary" style="margin-top: 20px;" onclick="App.openAdmin()">Панель Управления (Demo)</button>
-    </div>
-
-    <!-- Экран 7: Мероприятия -->
-    <div id="screen-events" class="screen">
-        <div class="header">
-            <button class="back-btn" onclick="App.goTo('passport')">←</button>
-            <div class="header-title">Секретные ужины</div>
-            <div style="width: 24px;"></div>
-        </div>
-        <div id="events-list"></div>
-    </div>
-
-    <!-- Админка -->
-    <div id="admin-panel">
-        <h2 style="color: white; margin-bottom: 20px;">Admin Panel (Demo)</h2>
-        <div class="admin-section">
-            <h3>Заказы</h3>
-            <div id="admin-orders"></div>
-        </div>
-        <div class="admin-section">
-            <h3>Сброс данных</h3>
-            <button class="admin-btn" style="background: #e31e24;" onclick="App.resetAllData()">ПОЛНЫЙ СБРОС</button>
-        </div>
-        <button class="admin-btn" onclick="App.closeAdmin()" style="margin-top: 20px; text-align:center;">Закрыть панель</button>
-    </div>
+    <!-- Админ панель полностью удалена -->
 </div>
 
+<div id="toast"></div>
+
 <script>
-    // === КОНФИГУРАЦИЯ ===
     const CONFIG = {
         partners: [
             { id: 'tanuki', name: 'Тануки', desc: 'Первый заказ. Попробуйте наш фирменный ролл!', logo: '🍣', menu: [ { id: 't1', name: 'Ролл Карамельный угорь', price: 835, img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300&h=200&fit=crop' } ] },
@@ -234,61 +261,140 @@
             { id: 'caspiyka', name: 'Каспийка', desc: 'Аутентичная каспийская кухня.', logo: '🐟', menu: [ { id: 'c1', name: 'Уха по-каспийски', price: 595, img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=200&fit=crop' } ] },
             { id: 'ers', name: 'Ёрш', desc: 'Домашняя кухня и сливочные соусы.', logo: '🍲', menu: [ { id: 'e1', name: 'Курица в сливочном соусе', price: 690, img: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=300&h=200&fit=crop' } ] },
             { id: 'tanuki_surprise', name: 'Сюрприз от Тануки', desc: 'Специальное предложение.', logo: '🎁', menu: [ { id: 't2', name: 'Суп Тануки-ям', price: 680, img: 'https://images.unsplash.com/photo-1548943487-a2e4b6bfb6d3?w=300&h=200&fit=crop' } ] }
-        ]
+        ],
+        // Добавлены данные для голосования
+        events: {
+            1: { 
+                id: 'ev1', date: '10.12.2026', time: '19:00', capacity: 60, bookedCount: 0, address: 'г. Москва, ул. Секретная, д. 1', addressRevealed: false, status: 'published', 
+                dishes: [
+                    { id: 'dish1', name: 'Филадельфия классик', desc: 'Лосось, сливочный сыр, огурец, кунжут', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=200&h=200&fit=crop', votes: 342 },
+                    { id: 'dish2', name: 'Калифорния с крабом', desc: 'Краб, авокадо, огурец, икра масаго', img: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=200&h=200&fit=crop', votes: 218 }
+                ],
+                userVote: null
+            },
+            2: { 
+                id: 'ev2', date: '21.01.2027', time: '19:00', capacity: 60, bookedCount: 0, address: 'г. Москва, ул. Тайная, д. 2', addressRevealed: false, status: 'published',
+                dishes: [
+                    { id: 'dish1', name: 'Запеченный ролл', desc: 'Угорь, сыр, рис', img: 'https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?w=200&h=200&fit=crop', votes: 120 },
+                    { id: 'dish2', name: 'Сет Тануки', desc: 'Ассорти из 5 видов роллов', img: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=200&h=200&fit=crop', votes: 150 }
+                ],
+                userVote: null
+            },
+            3: { 
+                id: 'ev3', date: '25.02.2027', time: '19:00', capacity: 60, bookedCount: 0, address: 'г. Москва, ул. Загадочная, д. 3', addressRevealed: false, status: 'published',
+                dishes: [
+                    { id: 'dish1', name: 'Том Ям', desc: 'Острый суп с креветками', img: 'https://images.unsplash.com/photo-1548943487-a2e4b6bfb6d3?w=200&h=200&fit=crop', votes: 88 },
+                    { id: 'dish2', name: 'Мисо суп', desc: 'Классический японский суп', img: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=200&h=200&fit=crop', votes: 112 }
+                ],
+                userVote: null
+            }
+        }
     };
 
-    // === БАЗА ДАННЫХ ===
     const DB = {
         get: (key) => JSON.parse(localStorage.getItem(`tanuki_${key}`)),
         set: (key, val) => localStorage.setItem(`tanuki_${key}`, JSON.stringify(val)),
         init: () => {
             if (!DB.get('user')) {
-                DB.set('user', { started: false, currentStep: 0, marks: 0, orders: [], cart: [], activePartnerId: null });
+                DB.set('user', { 
+                    started: false, cycle: 1, currentStep: 0, marks: 0, orders: [], cart: [], activePartnerId: null, history: [], notifications: [], bookings: []
+                });
+                DB.set('events', CONFIG.events);
+            } else {
+                // Мини-миграция: если в старых событиях нет блюд, добавляем их
+                let evs = DB.get('events');
+                for(let key in evs) {
+                    if(!evs[key].dishes) {
+                        evs[key].dishes = CONFIG.events[key] ? CONFIG.events[key].dishes : [];
+                        evs[key].userVote = null;
+                    }
+                }
+                DB.set('events', evs);
             }
         }
     };
     DB.init();
 
-    // === ЛОГИКА ===
     const App = {
         user: DB.get('user'),
+        events: DB.get('events'),
+        addressTimer: null,
+
+        save: () => {
+            DB.set('user', App.user);
+            DB.set('events', App.events);
+        },
+
+        showToast: (text) => {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        },
 
         goTo: (screenId) => {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(`screen-${screenId}`).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            if (['passport', 'partner', 'welcome', 'dinner-voting'].includes(screenId)) document.getElementById('nav-home').classList.add('active');
+            if (screenId === 'events' || screenId === 'event-finished') document.getElementById('nav-events').classList.add('active');
+            if (screenId === 'profile') document.getElementById('nav-orders').classList.add('active');
+            if (screenId === 'notifications') document.getElementById('nav-profile').classList.add('active');
+
             if(screenId === 'passport') App.renderPassport();
             if(screenId === 'profile') App.renderOrders();
             if(screenId === 'cart') App.renderCart();
+            if(screenId === 'events') App.renderEvents();
+            if(screenId === 'notifications') App.renderNotifications();
+            if(screenId === 'dinner-voting') App.renderVoting();
+            if(screenId === 'event-finished') App.renderEventFinished();
         },
 
         startApp: () => {
             App.user.started = true;
-            DB.set('user', App.user);
+            App.addNotification('Добро пожаловать в Гастропаспорт! Начните собирать отметки.');
+            App.save();
             App.goTo('passport');
         },
 
+        addNotification: (text) => {
+            App.user.notifications.unshift({ id: Date.now(), text, read: false });
+            App.save();
+        },
+
+        renderNotifications: () => {
+            const container = document.getElementById('notifications-list');
+            if (App.user.notifications.length === 0) {
+                container.innerHTML = '<p>Уведомлений пока нет.</p>';
+                return;
+            }
+            container.innerHTML = App.user.notifications.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}">${n.text}</div>
+            `).join('');
+            App.user.notifications.forEach(n => n.read = true);
+            App.save();
+        },
+
         renderPassport: () => {
-            const container = document.getElementById('steps-container');
+            document.getElementById('cycle-num').innerText = App.user.cycle;
             const progressText = document.getElementById('passport-progress-text');
             const progressFill = document.getElementById('passport-progress-fill');
             const eventBlock = document.getElementById('event-block');
+            const container = document.getElementById('steps-container');
 
             progressText.innerText = `${App.user.marks} из 5`;
             progressFill.style.width = `${(App.user.marks / 5) * 100}%`;
 
             if(App.user.marks >= 5) eventBlock.style.display = 'block';
+            else eventBlock.style.display = 'none';
 
             container.innerHTML = CONFIG.partners.map((p, index) => {
                 let statusClass = 'locked';
                 let statusText = 'Скоро откроется';
                 
-                if (index < App.user.currentStep) {
-                    statusClass = 'completed';
-                    statusText = 'Отметка получена';
-                } else if (index === App.user.currentStep) {
-                    statusClass = 'active-step';
-                    statusText = 'Доступен для заказа';
-                }
+                if (index < App.user.currentStep) { statusClass = 'completed'; statusText = 'Отметка получена'; }
+                else if (index === App.user.currentStep) { statusClass = 'active-step'; statusText = 'Доступен для заказа'; }
 
                 return `
                     <div class="step-card ${statusClass}" onclick="${index === App.user.currentStep ? `App.openPartner('${p.id}')` : ''}">
@@ -305,57 +411,44 @@
         openPartner: (partnerId) => {
             const partner = CONFIG.partners.find(p => p.id === partnerId);
             App.user.activePartnerId = partnerId;
-            DB.set('user', App.user);
+            App.save();
 
             document.getElementById('partner-title').innerText = partner.name;
             document.getElementById('partner-desc').innerText = partner.desc;
-            
             document.getElementById('partner-menu').innerHTML = partner.menu.map(item => `
                 <div class="product-card">
                     <img src="${item.img}" class="product-img" alt="${item.name}">
                     <div class="product-title">${item.name}</div>
                     <div class="product-price">${item.price} ₽</div>
-                    <button class="add-btn" onclick="App.addToCart('${partnerId}', '${item.id}')">В корзину</button>
+                    <button class="add-btn" onclick="App.addToCart('${partnerId}', '${item.id}')">Добавить в заказ</button>
                 </div>
             `).join('');
-
             App.goTo('partner');
         },
 
         addToCart: (partnerId, itemId) => {
             const partner = CONFIG.partners.find(p => p.id === partnerId);
             const item = partner.menu.find(i => i.id === itemId);
-            
             const existing = App.user.cart.find(c => c.id === itemId);
             if (existing) existing.qty += 1;
             else App.user.cart.push({ ...item, qty: 1, partnerId });
-            
-            DB.set('user', App.user);
-            App.goTo('cart'); // Автоматический переход в корзину
+            App.save();
+            App.showToast('Добавлено в корзину');
+            App.goTo('cart');
         },
 
         renderCart: () => {
             const container = document.getElementById('cart-items');
             const totalEl = document.getElementById('cart-total-price');
-            
             if (App.user.cart.length === 0) {
                 container.innerHTML = '<p style="text-align:center; margin-top:50px;">Корзина пуста</p>';
                 totalEl.innerText = '0 ₽';
                 return;
             }
-
             let total = 0;
             container.innerHTML = App.user.cart.map(item => {
                 total += item.price * item.qty;
-                return `
-                    <div class="cart-item">
-                        <div>
-                            <div style="font-weight:bold;">${item.name}</div>
-                            <div style="font-size:12px; color:#888;">${item.qty} шт.</div>
-                        </div>
-                        <div>${item.price * item.qty} ₽</div>
-                    </div>
-                `;
+                return `<div class="cart-item"><div><div style="font-weight:bold;">${item.name}</div><div style="font-size:12px; color:#888;">${item.qty} шт.</div></div><div>${item.price * item.qty} ₽</div></div>`;
             }).join('');
             totalEl.innerText = `${total} ₽`;
         },
@@ -365,33 +458,54 @@
             const phone = document.getElementById('order-phone').value;
             const address = document.getElementById('order-address').value;
 
-            if(!name || !phone || !address) {
-                alert('Заполните все поля');
-                return;
-            }
+            if(!name || !phone || !address) { alert('Заполните обязательные поля'); return; }
 
             const newOrder = {
                 id: 'ORD-' + Math.floor(Math.random() * 10000),
                 partnerId: App.user.activePartnerId,
                 total: App.user.cart.reduce((acc, item) => acc + (item.price * item.qty), 0),
                 status: 'Принят',
+                markGranted: false
             };
 
             App.user.orders.push(newOrder);
             App.user.cart = [];
-            DB.set('user', App.user);
+            App.save();
             
-            alert('Заказ оформлен! Теперь переведите его в статус "Доставлен" в Панели Управления.');
             App.goTo('profile');
+            // Автоматическая доставка через 3 секунды (имитация)
+            setTimeout(() => { App.autoDeliverOrder(newOrder.id); }, 3000);
+        },
+
+        autoDeliverOrder: (orderId) => {
+            const order = App.user.orders.find(o => o.id === orderId);
+            if (!order || order.status !== 'Принят' || order.markGranted) return;
+
+            order.status = 'Доставлен';
+            const partnerIndex = CONFIG.partners.findIndex(p => p.id === order.partnerId);
+            
+            if (partnerIndex === App.user.currentStep) {
+                App.user.marks += 1;
+                App.user.currentStep += 1;
+                order.markGranted = true;
+                
+                App.addNotification(`Курьер доставил заказ. Отметка получена. Прогресс: ${App.user.marks}/5`);
+                App.showToast(`Отметка получена! Прогресс: ${App.user.marks}/5`);
+                
+                if(App.user.marks === 5) {
+                    App.addNotification('Поздравляем! Вы собрали все пять отметок. Теперь доступно бронирование.');
+                    App.goTo('passport');
+                }
+            }
+
+            App.save();
+            App.renderOrders();
+            App.renderPassport();
         },
 
         renderOrders: () => {
             const container = document.getElementById('orders-list');
-            if (App.user.orders.length === 0) {
-                container.innerHTML = '<p>У вас пока нет заказов.</p>';
-                return;
-            }
-
+            if (App.user.orders.length === 0) { container.innerHTML = '<p>У вас пока нет заказов.</p>'; return; }
             container.innerHTML = App.user.orders.map(order => `
                 <div class="order-card">
                     <div style="font-weight:bold;">Заказ №${order.id}</div>
@@ -400,56 +514,200 @@
             `).join('');
         },
 
-        openAdmin: () => {
-            document.getElementById('admin-panel').classList.add('active');
-            App.renderAdminOrders();
-        },
-        
-        closeAdmin: () => document.getElementById('admin-panel').classList.remove('active'),
-
-        renderAdminOrders: () => {
-            const container = document.getElementById('admin-orders');
-            if (App.user.orders.length === 0) {
-                container.innerHTML = '<p style="color:#aaa;">Нет заказов</p>';
+        renderEvents: () => {
+            const container = document.getElementById('events-list');
+            const ev = App.events[App.user.cycle];
+            
+            if (!ev) {
+                container.innerHTML = '<p>Мероприятия для этого цикла еще не опубликованы.</p>';
                 return;
             }
+
+            let actionHtml = '';
             
-            container.innerHTML = App.user.orders.map(order => `
-                <div style="border-bottom:1px solid #444; padding: 10px 0;">
-                    <div>${order.id} (${order.status})</div>
-                    ${order.status !== 'Доставлен' ? `<button class="admin-btn" onclick="App.adminDeliverOrder('${order.id}')">Доставить</button>` : ''}
+            if (ev.status === 'published') {
+                const isBookedByUser = App.user.bookings.some(b => b.eventId === ev.id);
+                const seatsLeft = ev.capacity - ev.bookedCount;
+
+                if (App.user.marks < 5) {
+                    actionHtml = `<button class="btn" disabled>Соберите 5 отметок для брони</button>`;
+                } else if (isBookedByUser) {
+                    actionHtml = `<button class="btn" disabled style="background:var(--success);">Вы забронировали место</button>`;
+                    if (ev.addressRevealed) {
+                        actionHtml += `<div class="event-address">📍 ${ev.address}</div>`;
+                        // Кнопка перехода к голосованию
+                        if (!ev.userVote) {
+                            actionHtml += `<button class="btn" style="margin-top: 15px; background: var(--tanuki-dark);" onclick="App.goTo('dinner-voting')">🍽 Ужин начался (Войти)</button>`;
+                        } else {
+                            actionHtml += `<button class="btn" style="margin-top: 15px; background: #888;" onclick="App.goTo('dinner-voting')">Ужин завершен (Посмотреть итоги)</button>`;
+                        }
+                    } else {
+                        actionHtml += `<div class="event-secret">📍 Место встречи пока секрет.</div>`;
+                        actionHtml += `<div class="event-countdown">⏳ Адрес откроется через: <span id="countdown-timer">10 сек</span></div>`;
+                        App.startCountdown(ev);
+                    }
+                } else if (seatsLeft <= 0) {
+                    actionHtml = `<button class="btn" disabled>Все места заняты</button>`;
+                } else {
+                    actionHtml = `<button class="btn" onclick="App.bookEvent()">Забронировать место (Осталось: ${seatsLeft})</button>`;
+                }
+            } else if (ev.status === 'finished') {
+                App.goTo('event-finished');
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="event-card">
+                    <h3>Секретный ужин (Цикл ${App.user.cycle})</h3>
+                    <div class="event-meta">Дата: ${ev.date} ${ev.time ? 'в ' + ev.time : ''} • Вместимость: ${ev.capacity} чел.</div>
+                    ${actionHtml}
                 </div>
-            `).join('');
+            `;
         },
 
-        adminDeliverOrder: (orderId) => {
-            const order = App.user.orders.find(o => o.id === orderId);
-            if (!order || order.status === 'Доставлен') return;
-
-            order.status = 'Доставлен';
-            
-            const partnerIndex = CONFIG.partners.findIndex(p => p.id === order.partnerId);
-            
-            if (partnerIndex === App.user.currentStep) {
-                App.user.marks += 1;
-                App.user.currentStep += 1;
-                alert(`Отметка получена! Прогресс: ${App.user.marks}/5`);
-            }
-
-            DB.set('user', App.user);
-            App.renderAdminOrders();
-            App.renderPassport();
+        startCountdown: (ev) => {
+            if (App.addressTimer) clearInterval(App.addressTimer);
+            let seconds = 10; // Демо: 10 секунд
+            App.addressTimer = setInterval(() => {
+                const timerEl = document.getElementById('countdown-timer');
+                if (!timerEl) { clearInterval(App.addressTimer); return; }
+                seconds--;
+                timerEl.innerText = `${seconds} сек`;
+                if (seconds <= 0) {
+                    clearInterval(App.addressTimer);
+                    ev.addressRevealed = true;
+                    App.save();
+                    App.showToast('Место проведения раскрыто!');
+                    App.renderEvents();
+                }
+            }, 1000);
         },
 
-        resetAllData: () => {
-            if(confirm('Сбросить весь прогресс?')) {
-                localStorage.removeItem('tanuki_user');
-                location.reload();
+        bookEvent: () => {
+            const ev = App.events[App.user.cycle];
+            const seatsLeft = ev.capacity - ev.bookedCount;
+            if (seatsLeft <= 0) { alert('Мест больше нет'); return; }
+            if (App.user.bookings.some(b => b.eventId === ev.id)) { alert('Вы уже забронировали'); return; }
+
+            ev.bookedCount += 1;
+            App.user.bookings.push({ id: 'BKG-' + Date.now(), eventId: ev.id, status: 'Подтверждено' });
+            App.save();
+            App.addNotification('Вы успешно записались на секретный ужин!');
+            App.showToast('Место забронировано! Адрес откроется через 10 секунд.');
+            App.renderEvents();
+        },
+
+        // --- НОВАЯ ЛОГИКА ДЛЯ ГОЛОСОВАНИЯ ---
+        renderVoting: () => {
+            const ev = App.events[App.user.cycle];
+            const container = document.getElementById('voting-container');
+            const finishBtn = document.getElementById('finish-dinner-btn');
+
+            if (!ev || !ev.dishes) {
+                container.innerHTML = '<p>Ошибка загрузки меню.</p>';
+                return;
             }
+
+            const totalVotes = ev.dishes.reduce((sum, dish) => sum + dish.votes, 0);
+
+            container.innerHTML = ev.dishes.map((dish, index) => {
+                const percent = Math.round((dish.votes / totalVotes) * 100);
+                const isVoted = ev.userVote === dish.id;
+                const hasVoted = ev.userVote !== null;
+
+                return `
+                    <div class="vote-card">
+                        <div class="vote-img-wrapper">
+                            <img src="${dish.img}" alt="${dish.name}">
+                            <div class="vote-img-badge">${index + 1}/3</div>
+                        </div>
+                        <div class="vote-info">
+                            <div class="vote-title">${dish.name}</div>
+                            <div class="vote-desc">${dish.desc}</div>
+                            <div class="vote-progress-container">
+                                <div class="vote-progress-bar">
+                                    <div class="vote-progress-fill" style="width: ${percent}%"></div>
+                                </div>
+                                <div class="vote-percent">${percent}%</div>
+                            </div>
+                            <div class="vote-actions">
+                                <button class="vote-btn ${isVoted ? 'voted' : ''} ${hasVoted && !isVoted ? 'disabled' : ''}" 
+                                        onclick="App.voteDish('${dish.id}')"
+                                        ${hasVoted ? 'disabled' : ''}>
+                                    ${isVoted ? 'Ваш голос' : 'Голосовать'}
+                                </button>
+                                <div class="vote-avatars"><span>👥</span> +${dish.votes}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (ev.userVote) {
+                finishBtn.style.display = 'block';
+            } else {
+                finishBtn.style.display = 'none';
+            }
+        },
+
+        voteDish: (dishId) => {
+            const ev = App.events[App.user.cycle];
+            if (ev.userVote) return; // Уже проголосовал
+
+            ev.userVote = dishId;
+            const dish = ev.dishes.find(d => d.id === dishId);
+            if (dish) dish.votes += 1;
+
+            App.save();
+            App.showToast('Спасибо! Ваш голос учтен.');
+            App.renderVoting(); // Перерисовываем, чтобы обновить проценты и кнопки
+        },
+
+        finishDinner: () => {
+            const ev = App.events[App.user.cycle];
+            ev.status = 'finished';
+            App.save();
+            App.goTo('event-finished');
+        },
+
+        renderEventFinished: () => {
+            const ev = App.events[App.user.cycle];
+            const container = document.getElementById('finished-content');
+            
+            container.innerHTML = `
+                <div class="welcome-icon" style="text-align:center; font-size:50px; margin-bottom:10px;">🎉</div>
+                <h1 style="text-align:center;">Ужин завершен!</h1>
+                <p style="text-align:center; margin-bottom:20px;">Спасибо за участие в секретном ужине ${ev.date}. Было вкусно!</p>
+                <div class="event-address" style="text-align:center; margin-top:20px;">Ваш голос за блюдо был отправлен шеф-повару.</div>
+                <button class="btn btn-secondary" style="margin-top:20px;" onclick="App.startNewCycle()">Начать новый Гастропаспорт</button>
+            `;
+        },
+
+        startNewCycle: () => {
+            App.user.history.push({
+                cycle: App.user.cycle,
+                event: App.events[App.user.cycle],
+                marks: App.user.marks
+            });
+            
+            App.user.cycle += 1;
+            App.user.currentStep = 0;
+            App.user.marks = 0;
+            App.user.orders = [];
+            App.user.cart = [];
+            
+            if (App.user.cycle > 3) {
+                alert('Вы прошли все 3 цикла! Это была демонстрация.');
+                App.user.cycle = 1;
+            }
+
+            App.save();
+            App.addNotification(`Начался новый цикл (${App.user.cycle})! Соберите 5 отметок.`);
+            App.goTo('passport');
+            App.showToast(`Начался цикл ${App.user.cycle}!`);
         }
     };
 
-    // Запуск
     if (DB.get('user').started) {
         App.goTo('passport');
     }
